@@ -27,9 +27,9 @@ First, simply filtering the data before thresholding
 
 #include "MultiBandIntegrator.h"
 #include "MultiBandIntegratorEditor.h"
-#include "boostAcc/boost/accumulators/accumulators.hpp"
-#include "boostAcc/boost/accumulators/statistics.hpp"
-#include "boostAcc/boost/accumulators/statistics/rolling_mean.hpp"
+//#include "boostAcc/boost/accumulators/accumulators.hpp"
+//#include "boostAcc/boost/accumulators/statistics.hpp"
+//#include "boostAcc/boost/accumulators/statistics/rolling_mean.hpp"
 
 
 
@@ -50,9 +50,6 @@ MultiBandIntegrator::MultiBandIntegrator()
 {
     setProcessorType(PROCESSOR_TYPE_FILTER);
 
-	
-
-
 }
 
 MultiBandIntegrator::~MultiBandIntegrator() {}
@@ -72,8 +69,6 @@ void MultiBandIntegrator::createEventChannels()
 	//create accumulator and buffers for filtering
 	//snuck in with create event channels because it only 
 
-	deltaAcc acc(bt::rolling_window::window_size = sampleRate);
-
 	scratchBuffer = AudioSampleBuffer(5, sampleRate); // 5-dimensional buffer to hold band-filtered, averaged data
 
 
@@ -82,10 +77,18 @@ void MultiBandIntegrator::createEventChannels()
 
 }
 
-//void MultiBandIntegrator::updateSettings()
-//{
-	
-//}
+void MultiBandIntegrator::updateSettings()
+{
+	//namespace ba = boost::accumulators;
+	//namespace bt = ba::tag;
+	//typedef ba::accumulator_set < double, ba::stats < bt::rolling_mean > > deltaAcc;
+
+
+	//boost::accumulators::accumulator_set <double, boost::accumulators::stats < boost::accumulators::tag::rolling_mean_mean> >
+	//	acc(boost::accumulators::tag::rolling_window::window_size = sampleRate); // 1 s rolling window
+
+	rollingAverage.setSize(CoreServices::getGlobalSampleRate());
+}
 
 void MultiBandIntegrator::setRollingWindowParameters()
 {
@@ -179,7 +182,7 @@ void MultiBandIntegrator::process(AudioSampleBuffer& continuousBuffer)
 		rawChan = currChan - 2;
 	}
 
-	//copy channel to scractchBuffer channels for processing
+	//copy channel to scratchBuffer channels for processing
 
 	for (int n = 0; n < 3; n = n + 1)
 	{
@@ -260,32 +263,34 @@ void MultiBandIntegrator::process(AudioSampleBuffer& continuousBuffer)
 		                      nSamples);
 	
 
-	//apply a 1s rolling average do delta band
+	//apply a 1s rolling average to delta band
 	//initialize constants
 	int sampRate = dataChannelArray[currChan]->getSampleRate();
 	int rollSamples = rollBuffer.getNumSamples();
 	int rollAdd = rollSamples - nSamples;
 	
 	//initialize accumulator with 1 second rolling window
-	deltaAcc acc(bt::rolling_window::window_size = rollSamples);
+	rollingAverage.setSize(rollSamples);
 	float rollM;
 
 	//push previous 1 second of differentiated data into the accumulator
-	for (int i = 0; i < rollSamples-1; i++)
+	for (int i = 0; i < rollSamples-1; i++) // samples in buffer
 	{
-		acc(std::fabs(rollBuffer.getSample(0, i+1)-rollBuffer.getSample(0,i)));
+		rollingAverage.addSample(std::fabs(rollBuffer.getSample(0, i + 1) - rollBuffer.getSample(0, i)));
+
 		//acc(rollBuffer.getSample(0, i));
 	}
 
 	//push new data into accumulator and get rolling average
 	//acc(continuousBuffer.getSample(0, 0) - rollBuffer.getSample(0,sampRate));
-	rollM = boost::accumulators::rolling_mean(acc);
+	rollM = rollingAverage.calculate(); // get the rolling mean
+
 	scratchBuffer.setSample(3, 0, rollM);
 	//acc(rollBuffer.getSample(0, sampRate));
 	for (int i = 0; i < nSamples-1; i++)
 	{
-		acc(std::fabs(continuousBuffer.getSample(currChan, i + 1) - continuousBuffer.getSample(currChan, i)));
-		rollM = boost::accumulators::rolling_mean(acc);
+		rollingAverage.addSample(std::fabs(continuousBuffer.getSample(currChan, i + 1) - continuousBuffer.getSample(currChan, i)));
+		rollM = rollingAverage.calculate();
 		//put the rolling mean into channel 3(4) of the scratch buffer
 		scratchBuffer.setSample(3, i+1, rollM);
 	}
@@ -408,3 +413,40 @@ bool MultiBandIntegrator::disable()
 
 
 
+RollingAverage::RollingAverage()
+{
+	setSize(1);
+}
+
+RollingAverage::~RollingAverage()
+{
+
+}
+
+void RollingAverage::setSize(int numSamples)
+{
+	buffer.clear();
+	buffer.resize(numSamples);
+	index = 0;
+}
+
+void RollingAverage::addSample(double sample)
+{
+	buffer.set(index, sample);
+
+	index += 1;
+	index %= buffer.size();
+}
+
+
+double RollingAverage::calculate() {
+
+	double avg;
+
+	for (int i = 0; i < buffer.size(); i++)
+	{
+		avg += buffer[i];
+	}
+
+	return avg / buffer.size();
+}

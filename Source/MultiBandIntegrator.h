@@ -47,13 +47,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <ProcessorHeaders.h>
 #include <algorithm> // max
 #include "Dsp/Dsp.h" // filtering
-#include "boostAcc/boost/accumulators/accumulators.hpp"
-#include "boostAcc/boost/accumulators/statistics.hpp"
-#include "boostAcc/boost/accumulators/statistics/rolling_mean.hpp"
+//#include "boostAcc/boost/accumulators/accumulators.hpp"
+//#include "boostAcc/boost/accumulators/statistics.hpp"
+//#include "boostAcc/boost/accumulators/statistics/rolling_mean.hpp"
 
-namespace ba = boost::accumulators;
-namespace bt = ba::tag;
-typedef ba::accumulator_set < double, ba::stats < bt::rolling_mean > > deltaAcc;
 
 
 
@@ -72,6 +69,22 @@ enum
 	pDeltaGain
 };
 
+class RollingAverage
+{
+public:
+	RollingAverage();
+	~RollingAverage();
+
+	void setSize(int numSamples);
+	void addSample(double sample);
+	double calculate();
+
+private:
+
+	Array<double> buffer;
+	int index;
+};
+
 class MultiBandIntegrator : public GenericProcessor
 {
     friend class MultiBandIntegratorEditor;
@@ -85,7 +98,7 @@ public:
 
     void createEventChannels() override;
 
-	//void updateSettings() override;
+	void updateSettings() override;
 
 	//void createConfigurationObjects() override;
 
@@ -125,6 +138,7 @@ private:
 
     int inputChan;
 
+	RollingAverage rollingAverage;
 
     EventChannel* eventChannelPtr;
     MetaDataDescriptorArray eventMetaDataDescriptors;
