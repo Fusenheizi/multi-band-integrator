@@ -83,6 +83,12 @@ private:
 
 	Array<double> buffer;
 	int index;
+
+	double sum;
+
+	int newSamples;
+
+	double lastAvg;
 };
 
 class MultiBandIntegrator : public GenericProcessor

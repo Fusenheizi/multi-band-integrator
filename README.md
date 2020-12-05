@@ -11,9 +11,23 @@ Users can specify
 * Gain for each frequency band
 
 ## Installation
-This plugin has only been built and tested on Windows so far.  It depends on the Dsp library and a subset of the Boost libraries for those interested in building for Linux or OSX. 
-* Copy `multi-band-integrator/Source/' to `plugin-GUI/Source/Plugins/MultiBandIntegrator`.
 
-* Copy `multi-band-integrator/Builds/VisualStudio2013/MultiBandIntegrator` to `plugin-GUI/Builds/VisualStudio2013/Plugins/MultiBandIntegrator`.
+Place the source code in a directory inside a plugin-specific directory at the same level as the "plugin-GUI"
 
-* In Visual Studio, open the `Plugins.sln` solution and add the MultiBandIntegrator project (`File->Add->Existing Project...` and select `Builds/VisualStudio2013/Plugins/MultiBandIntegrator/MultiBandIntegrator.vcxproj`). Then build the plugin.
+e.g.:
+/code
+    /plugin-GUI
+    /OEPlugins
+        /multi-band-integrator
+            /Source
+            /Build
+
+From inside the "Build" directory, run:
+
+```
+> cmake -G "Visual Studio 16 2019" -A x64 ..
+```
+
+Then, open the generated .sln file to compile / install.
+
+This plugin has only been built and tested on Windows so far. It depends on the Dsp library (included in the source directory).

@@ -277,22 +277,20 @@ void MultiBandIntegrator::process(AudioSampleBuffer& continuousBuffer)
 	for (int i = 0; i < rollSamples-1; i++) // samples in buffer
 	{
 		rollingAverage.addSample(std::fabs(rollBuffer.getSample(0, i + 1) - rollBuffer.getSample(0, i)));
-
-		//acc(rollBuffer.getSample(0, i));
 	}
 
 	rollM = rollingAverage.calculate(); // get the rolling mean
 	scratchBuffer.setSample(3, 0, rollM);
-
+	
 
 	for (int i = 0; i < nSamples-1; i++)
 	{
 		rollingAverage.addSample(std::fabs(continuousBuffer.getSample(currChan, i + 1) - continuousBuffer.getSample(currChan, i)));
-		rollM = rollingAverage.calculate();
+		rollM = 0; // rollingAverage.calculate();
 		//put the rolling mean into channel 3(4) of the scratch buffer
 		scratchBuffer.setSample(3, i+1, rollM);
 	}
-
+	
 	//update rolling buffer, making sure to put new samples at 
 	//the end for smooth rolling!
 	// CHECK THIS -- copying to itself?
@@ -409,6 +407,9 @@ bool MultiBandIntegrator::disable()
 RollingAverage::RollingAverage()
 {
 	setSize(1);
+
+	newSamples = 0;
+	sum = 0;
 }
 
 RollingAverage::~RollingAverage()
@@ -419,12 +420,15 @@ RollingAverage::~RollingAverage()
 void RollingAverage::setSize(int numSamples)
 {
 	buffer.clear();
-	buffer.resize(numSamples);
+	buffer.insertMultiple(0, 0, numSamples);
 	index = 0;
 }
 
 void RollingAverage::addSample(double sample)
 {
+	sum -= buffer[index];
+	sum += sample;
+
 	buffer.set(index, sample);
 
 	index += 1;
@@ -434,12 +438,5 @@ void RollingAverage::addSample(double sample)
 
 double RollingAverage::calculate() {
 
-	double avg = 0;
-
-	for (int i = 0; i < buffer.size(); i++)
-	{
-		avg += buffer[i];
-	}
-
-	return avg / buffer.size();
+	return sum / buffer.size();
 }
