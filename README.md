@@ -15,12 +15,14 @@ Users can specify
 Place the source code in a directory inside a plugin-specific directory at the same level as the "plugin-GUI"
 
 e.g.:
+```
 /code
     /plugin-GUI
     /OEPlugins
         /multi-band-integrator
             /Source
             /Build
+```
 
 From inside the "Build" directory, run:
 
