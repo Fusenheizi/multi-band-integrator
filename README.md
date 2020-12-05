@@ -1,7 +1,8 @@
-# Multi-band Integrator Plugin
-This Open-Ephys plugin allows the user to mix, weight, and apply a rolling average to bandwidths of interest on a single channel.  Its output can be thought of as a real-time power signal for waveforms with complex but well-specified frequency components.  It can be paired with the crossing detector plugin to trigger events when the output power reaches a threshold to trigger events based on waveforms of interest.
+# Multi-Band Integrator
 
-It was originally developed to detect absence-like seizures in mice in real time based on their spectral properties as described in Sorokin et al, 2016. 
+This Open Ephys GUI plugin allows the user to mix, weight, and apply a rolling average to bandwidths of interest on a single channel.  Its output can be thought of as a real-time power signal for waveforms with complex but well-specified frequency components.  It can be paired with the crossing detector plugin to trigger events when the output power reaches a threshold, to trigger events based on waveforms of interest.
+
+It was originally developed by Michelle Fogerson in the Huguenard Lab at Stanford to detect absence-like seizures in mice in real time based on their spectral properties [(Sorokin et al., 2016)](https://www.sciencedirect.com/science/article/abs/pii/S0928425717300372).
 
 ## Settings
 Users can specify 
