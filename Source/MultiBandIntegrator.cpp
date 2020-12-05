@@ -281,12 +281,10 @@ void MultiBandIntegrator::process(AudioSampleBuffer& continuousBuffer)
 		//acc(rollBuffer.getSample(0, i));
 	}
 
-	//push new data into accumulator and get rolling average
-	//acc(continuousBuffer.getSample(0, 0) - rollBuffer.getSample(0,sampRate));
 	rollM = rollingAverage.calculate(); // get the rolling mean
-
 	scratchBuffer.setSample(3, 0, rollM);
-	//acc(rollBuffer.getSample(0, sampRate));
+
+
 	for (int i = 0; i < nSamples-1; i++)
 	{
 		rollingAverage.addSample(std::fabs(continuousBuffer.getSample(currChan, i + 1) - continuousBuffer.getSample(currChan, i)));
@@ -295,24 +293,22 @@ void MultiBandIntegrator::process(AudioSampleBuffer& continuousBuffer)
 		scratchBuffer.setSample(3, i+1, rollM);
 	}
 
-
 	//update rolling buffer, making sure to put new samples at 
 	//the end for smooth rolling!
+	// CHECK THIS -- copying to itself?
+	//rollBuffer.copyFrom(0, // destChannel
+	//	0,				   // destStartSample
+	//	rollBuffer,		   // source
+	//	0,			       // sourceChannel
+	//	nSamples,		   // sourceStartSample
+	//	rollAdd);		   // nSamples
 
-	rollBuffer.copyFrom(0,
-		0,
-		rollBuffer,
-		0,
-		nSamples,
-		rollAdd);
-
-	rollBuffer.copyFrom(0,
-		rollAdd,
-		continuousBuffer,
-		currChan,
-		0,
-		nSamples);
-
+	rollBuffer.copyFrom(0, // destChannel
+		rollAdd,		   // destStartSample
+		continuousBuffer,  // source
+		currChan,          // sourceChannel
+		0,				   // sourceStartSample
+		nSamples);		   // nSamples
 
 	//temporarily add gain to output signal so that its units are more useful
 	scratchBuffer.applyGain(3, 0, nSamples, 100);
@@ -326,9 +322,6 @@ void MultiBandIntegrator::process(AudioSampleBuffer& continuousBuffer)
 		                      nSamples);
 
 	scratchBuffer.applyGain(3, 0, nSamples, 1);
-
-
-
 
 	//show raw delta on output channel 5
 	//continuousBuffer.copyFrom(4,
@@ -441,7 +434,7 @@ void RollingAverage::addSample(double sample)
 
 double RollingAverage::calculate() {
 
-	double avg;
+	double avg = 0;
 
 	for (int i = 0; i < buffer.size(); i++)
 	{
