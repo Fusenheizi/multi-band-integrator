@@ -27,12 +27,6 @@ First, simply filtering the data before thresholding
 
 #include "MultiBandIntegrator.h"
 #include "MultiBandIntegratorEditor.h"
-//#include "boostAcc/boost/accumulators/accumulators.hpp"
-//#include "boostAcc/boost/accumulators/statistics.hpp"
-//#include "boostAcc/boost/accumulators/statistics/rolling_mean.hpp"
-
-
-
 
 MultiBandIntegrator::MultiBandIntegrator()
     : GenericProcessor  ("Multi-band Integrator")
@@ -60,34 +54,20 @@ AudioProcessorEditor* MultiBandIntegrator::createEditor()
     return editor;
 }
 
-void MultiBandIntegrator::createEventChannels()
+
+void MultiBandIntegrator::updateSettings()
 {
-    // add detection event channel
-    const DataChannel* in = getDataChannel(inputChan);
-    float sampleRate = in ? in->getSampleRate() : CoreServices::getGlobalSampleRate();
 
-	//create accumulator and buffers for filtering
-	//snuck in with create event channels because it only 
+	const DataChannel* in = getDataChannel(inputChan);
 
-	scratchBuffer = AudioSampleBuffer(5, sampleRate); // 5-dimensional buffer to hold band-filtered, averaged data
+	float sampleRate = in ? in->getSampleRate() : CoreServices::getGlobalSampleRate();
 
+	// 5 channel buffer to hold band-filtered, averaged data
+	scratchBuffer = AudioSampleBuffer(5, sampleRate); 
 
 	setFilterParameters();
 	setRollingWindowParameters();
 
-}
-
-void MultiBandIntegrator::updateSettings()
-{
-	//namespace ba = boost::accumulators;
-	//namespace bt = ba::tag;
-	//typedef ba::accumulator_set < double, ba::stats < bt::rolling_mean > > deltaAcc;
-
-
-	//boost::accumulators::accumulator_set <double, boost::accumulators::stats < boost::accumulators::tag::rolling_mean_mean> >
-	//	acc(boost::accumulators::tag::rolling_window::window_size = sampleRate); // 1 s rolling window
-
-	rollingAverage.setSize(CoreServices::getGlobalSampleRate());
 }
 
 void MultiBandIntegrator::setRollingWindowParameters()
@@ -95,7 +75,8 @@ void MultiBandIntegrator::setRollingWindowParameters()
 	//set rolling buffer size
 	int sampRate = dataChannelArray[inputChan]->getSampleRate();
 	int buffSize = sampRate*rollDur / 1000;
-	rollBuffer = AudioSampleBuffer(2, buffSize);    // buffer for rolling average data
+
+	rollingAverage.setSize(buffSize);
 
 }
 
@@ -115,6 +96,7 @@ void MultiBandIntegrator::setFilterParameters()
 			1,                                     // number of channels (must be const)
 			Dsp::DirectFormII>(1));               // realization
 	}
+	
 	//alpha (fundamental) frequency parameters
 	//alphaHigh = 9;
 	//alphaLow = 6;
@@ -148,42 +130,47 @@ void MultiBandIntegrator::setFilterParameters()
 
 	filters[2]->setParams(deltaParams);
 
+}
 
+bool MultiBandIntegrator::enable()
+{
+	setRollingWindowParameters();
+
+	return true;
 }
 
 void MultiBandIntegrator::process(AudioSampleBuffer& continuousBuffer)
 {
-    // state to keep constant during each call
-    int currChan = inputChan;
 
-    if (currChan < 0 || currChan >= continuousBuffer.getNumChannels()) // (shouldn't really happen)
+	int currChan = inputChan;
+
+    if (inputChan < 0 || inputChan >= continuousBuffer.getNumChannels()) // (shouldn't really happen)
         return;
 
-    int nSamples = getNumSamples(currChan);
-    const float* rp = continuousBuffer.getReadPointer(currChan);
+    int nSamples = getNumSamples(inputChan);
+    const float* rp = continuousBuffer.getReadPointer(inputChan);
 
 	//get adjacent channel numbers to display raw data, pre-averaged signal
 	int preAvgChan;
 	int rawChan;
 
-	if (currChan < (continuousBuffer.getNumChannels() - 2))
+	if (inputChan < (continuousBuffer.getNumChannels() - 2))
 	{
-		rawChan = currChan + 2;
-		preAvgChan = currChan + 1;
+		rawChan = inputChan + 2;
+		preAvgChan = inputChan + 1;
 	}
-	else if (currChan < (continuousBuffer.getNumChannels() - 1))
+	else if (inputChan < (continuousBuffer.getNumChannels() - 1))
 	{
-		rawChan = currChan - 1;
-		preAvgChan = currChan + 1;
+		rawChan = inputChan - 1;
+		preAvgChan = inputChan + 1;
 	}
 	else
 	{
-		preAvgChan = currChan - 1;
-		rawChan = currChan - 2;
+		preAvgChan = inputChan - 1;
+		rawChan = inputChan - 2;
 	}
 
-	//copy channel to scratchBuffer channels for processing
-
+	//copy input channel to scratchBuffer channels for processing
 	for (int n = 0; n < 3; n = n + 1)
 	{
 		 scratchBuffer.copyFrom(n,
@@ -236,13 +223,12 @@ void MultiBandIntegrator::process(AudioSampleBuffer& continuousBuffer)
 		                      0,
 		                      nSamples);
 
-	continuousBuffer.addFrom(currChan,			//dest channel
-		                     0,                 //dest start sample
+	continuousBuffer.addFrom(currChan,	     //dest channel
+		                     0,              //dest start sample
 		                     scratchBuffer,  //source buffer
-		                     1,          //source channel
-		                     0,                 //source start sample
-		                     nSamples);          //num samples
-		                     //betaGain);             //gain
+		                     1,              //source channel
+		                     0,              //source start sample
+		                     nSamples);      //num samples
 
 	continuousBuffer.addFrom(currChan,
 		                     0,
@@ -250,11 +236,9 @@ void MultiBandIntegrator::process(AudioSampleBuffer& continuousBuffer)
 		                     2,
 		                     0,
 		                     nSamples);
-		                     //deltaGain);
 
 	//show unaveraged trigger signal on output channel adjacent to 
 	//input/triggering channel
-
 	continuousBuffer.copyFrom(preAvgChan,
 							  0,
 		                      continuousBuffer,
@@ -263,53 +247,17 @@ void MultiBandIntegrator::process(AudioSampleBuffer& continuousBuffer)
 		                      nSamples);
 	
 
-	//apply a 1s rolling average to delta band
-	//initialize constants
-	int sampRate = dataChannelArray[currChan]->getSampleRate();
-	int rollSamples = rollBuffer.getNumSamples();
-	int rollAdd = rollSamples - nSamples;
-	
-	//initialize accumulator with 1 second rolling window
-	rollingAverage.setSize(rollSamples);
-	float rollM;
-
-	//push previous 1 second of differentiated data into the accumulator
-	for (int i = 0; i < rollSamples-1; i++) // samples in buffer
-	{
-		rollingAverage.addSample(std::fabs(rollBuffer.getSample(0, i + 1) - rollBuffer.getSample(0, i)));
-	}
-
-	rollM = rollingAverage.calculate(); // get the rolling mean
-	scratchBuffer.setSample(3, 0, rollM);
-	
+	scratchBuffer.setSample(3, 0, rollingAverage.calculate());
 
 	for (int i = 0; i < nSamples-1; i++)
 	{
 		rollingAverage.addSample(std::fabs(continuousBuffer.getSample(currChan, i + 1) - continuousBuffer.getSample(currChan, i)));
-		rollM = 0; // rollingAverage.calculate();
 		//put the rolling mean into channel 3(4) of the scratch buffer
-		scratchBuffer.setSample(3, i+1, rollM);
+		scratchBuffer.setSample(3, i+1, rollingAverage.calculate());
 	}
-	
-	//update rolling buffer, making sure to put new samples at 
-	//the end for smooth rolling!
-	// CHECK THIS -- copying to itself?
-	//rollBuffer.copyFrom(0, // destChannel
-	//	0,				   // destStartSample
-	//	rollBuffer,		   // source
-	//	0,			       // sourceChannel
-	//	nSamples,		   // sourceStartSample
-	//	rollAdd);		   // nSamples
 
-	rollBuffer.copyFrom(0, // destChannel
-		rollAdd,		   // destStartSample
-		continuousBuffer,  // source
-		currChan,          // sourceChannel
-		0,				   // sourceStartSample
-		nSamples);		   // nSamples
-
-	//temporarily add gain to output signal so that its units are more useful
-	scratchBuffer.applyGain(3, 0, nSamples, 100);
+	//add gain to output signal so that its units are more useful
+	scratchBuffer.applyGain(3, 0, nSamples, 1000);
 
 	//overwrite the triggering channel with 1s averaged data
 	continuousBuffer.copyFrom(currChan,
@@ -318,21 +266,6 @@ void MultiBandIntegrator::process(AudioSampleBuffer& continuousBuffer)
 		                      3,
 		                      0,
 		                      nSamples);
-
-	scratchBuffer.applyGain(3, 0, nSamples, 1);
-
-	//show raw delta on output channel 5
-	//continuousBuffer.copyFrom(4,
-	//	                     0,
-	//	                     scratchBuffer,
-	//	                     2,
-	//	                     0,
-	//	                     nSamples);
-
-	//continuousBuffer.applyGain(1);
-
-	//end filtering code
-
     
 }
 
@@ -422,6 +355,8 @@ void RollingAverage::setSize(int numSamples)
 	buffer.clear();
 	buffer.insertMultiple(0, 0, numSamples);
 	index = 0;
+
+	sum = 0;
 }
 
 void RollingAverage::addSample(double sample)

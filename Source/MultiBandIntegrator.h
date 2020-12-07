@@ -100,17 +100,16 @@ public:
     ~MultiBandIntegrator();
     
     bool hasEditor() const { return true; }
+
     AudioProcessorEditor* createEditor() override;
 
-    void createEventChannels() override;
-
 	void updateSettings() override;
-
-	//void createConfigurationObjects() override;
 
 	void setFilterParameters();
 
 	void setRollingWindowParameters();
+
+	bool enable() override;
 
     void process(AudioSampleBuffer& continuousBuffer) override;
 
@@ -124,7 +123,6 @@ private:
 	OwnedArray<Dsp::Filter> filters;
 	
 	AudioSampleBuffer scratchBuffer;
-	AudioSampleBuffer rollBuffer;
 
 	float rollDur;
 

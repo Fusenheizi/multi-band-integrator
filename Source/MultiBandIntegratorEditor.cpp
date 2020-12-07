@@ -258,12 +258,12 @@ void MultiBandIntegratorEditor::updateSettings()
 
 void MultiBandIntegratorEditor::startAcquisition()
 {
-    inputBox->setEnabled(false);
+    //inputBox->setEnabled(false);
 }
 
 void MultiBandIntegratorEditor::stopAcquisition()
 {
-    inputBox->setEnabled(true);
+    //inputBox->setEnabled(true);
 }
 
 
@@ -274,9 +274,11 @@ void MultiBandIntegratorEditor::saveCustomParameters(XmlElement* xml)
     MultiBandIntegrator* processor = static_cast<MultiBandIntegrator*>(getProcessor());
     XmlElement* paramValues = xml->createNewChildElement("VALUES");
 
-    // channels
+    // selected channel
     paramValues->setAttribute("inputChanId", inputBox->getSelectedId());
- 
+
+	// window size
+	paramValues->setAttribute("windowSize", rollEdit->getText());
 
 	//frequency bands
 	paramValues->setAttribute("alphaLow", alphaLowEdit->getText());
@@ -300,6 +302,9 @@ void MultiBandIntegratorEditor::loadCustomParameters(XmlElement* xml)
     {
         // channels
         inputBox->setSelectedId(xmlNode->getIntAttribute("inputChanId", inputBox->getSelectedId()), sendNotificationAsync);
+
+		// window size
+		rollEdit->setText(xmlNode->getStringAttribute("windowSize", rollEdit->getText()), sendNotificationAsync);
        
 		// frequency bands
 		alphaLowEdit->setText(xmlNode->getStringAttribute("alphaLow", alphaLowEdit->getText()), sendNotificationAsync);
