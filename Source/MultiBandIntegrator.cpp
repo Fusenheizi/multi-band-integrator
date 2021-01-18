@@ -57,16 +57,20 @@ AudioProcessorEditor* MultiBandIntegrator::createEditor()
 
 void MultiBandIntegrator::updateSettings()
 {
+	if (settings.numInputs > 0)
+	{
 
-	const DataChannel* in = getDataChannel(inputChan);
+		const DataChannel* in = getDataChannel(inputChan);
 
-	float sampleRate = in ? in->getSampleRate() : CoreServices::getGlobalSampleRate();
+		float sampleRate = in ? in->getSampleRate() : CoreServices::getGlobalSampleRate();
 
-	// 5 channel buffer to hold band-filtered, averaged data
-	scratchBuffer = AudioSampleBuffer(5, sampleRate); 
+		// 5 channel buffer to hold band-filtered, averaged data
+		scratchBuffer = AudioSampleBuffer(5, sampleRate); 
 
-	setFilterParameters();
-	setRollingWindowParameters();
+		setFilterParameters();
+		setRollingWindowParameters();
+	}
+	
 
 }
 
