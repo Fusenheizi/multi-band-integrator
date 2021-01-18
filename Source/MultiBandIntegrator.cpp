@@ -86,9 +86,12 @@ void MultiBandIntegrator::setRollingWindowParameters()
 
 void MultiBandIntegrator::setFilterParameters()
 {
+	if (settings.numInputs == 0)
+		return;
 
 
 	//design 3 filters with similar properties
+
 
 	int sampRate = dataChannelArray[inputChan]->getSampleRate();
 
