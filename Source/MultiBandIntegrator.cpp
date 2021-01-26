@@ -34,13 +34,13 @@ MultiBandIntegrator::MultiBandIntegrator()
 	, rollDur           (1000)
 	, alphaLow          (6.0f)
 	, alphaHigh         (9.0f)
-	, alphaGain         (1.0f)
+	, alphaGain         (4.0f)
 	, betaLow           (13.0f)
 	, betaHigh          (18.0f)
-	, betaGain          (1.0f)
+	, betaGain          (7.0f)
 	, deltaLow          (1.0f)
 	, deltaHigh         (4.0f)
-	, deltaGain         (1.0f)
+	, deltaGain         (-1.0f)
 {
     setProcessorType(PROCESSOR_TYPE_FILTER);
 
@@ -264,7 +264,7 @@ void MultiBandIntegrator::process(AudioSampleBuffer& continuousBuffer)
 	}
 
 	//add gain to output signal so that its units are more useful
-	scratchBuffer.applyGain(3, 0, nSamples, 1000);
+	scratchBuffer.applyGain(3, 0, nSamples, 10);
 
 	//overwrite the triggering channel with 1s averaged data
 	continuousBuffer.copyFrom(currChan,
