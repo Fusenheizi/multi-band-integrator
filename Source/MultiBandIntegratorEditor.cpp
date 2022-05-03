@@ -23,8 +23,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "MultiBandIntegratorEditor.h"
 #include "MultiBandIntegrator.h"
 
-MultiBandIntegratorEditor::MultiBandIntegratorEditor(GenericProcessor* parentNode, bool useDefaultParameterEditors)
-    : GenericEditor(parentNode, useDefaultParameterEditors)
+MultiBandIntegratorEditor::MultiBandIntegratorEditor(GenericProcessor* parentNode)
+    : GenericEditor(parentNode)
 {
 	desiredWidth = 250;
 
@@ -239,7 +239,7 @@ void MultiBandIntegratorEditor::updateSettings()
     MultiBandIntegrator* processor = static_cast<MultiBandIntegrator*>(getProcessor());
 
     // update input combo box
-    int numInputs = processor->settings.numInputs;
+    int numInputs = processor->getNumInputs();
     int numBoxItems = inputBox->getNumItems();
     if (numInputs != numBoxItems)
     {
@@ -256,18 +256,8 @@ void MultiBandIntegratorEditor::updateSettings()
     
 }
 
-void MultiBandIntegratorEditor::startAcquisition()
-{
-    //inputBox->setEnabled(false);
-}
 
-void MultiBandIntegratorEditor::stopAcquisition()
-{
-    //inputBox->setEnabled(true);
-}
-
-
-void MultiBandIntegratorEditor::saveCustomParameters(XmlElement* xml)
+void MultiBandIntegratorEditor::saveCustomParametersToXml(XmlElement* xml)
 {
     xml->setAttribute("Type", "MultiBandIntegratorEditor");
 
@@ -294,7 +284,7 @@ void MultiBandIntegratorEditor::saveCustomParameters(XmlElement* xml)
 	paramValues->setAttribute("deltaGain", deltaEditable->getText());
 }
 
-void MultiBandIntegratorEditor::loadCustomParameters(XmlElement* xml)
+void MultiBandIntegratorEditor::loadCustomParametersFromXml(XmlElement* xml)
 {
     MultiBandIntegrator* processor = static_cast<MultiBandIntegrator*>(getProcessor());
 

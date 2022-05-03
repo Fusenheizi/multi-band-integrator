@@ -30,7 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <cfloat>
 #include <algorithm>
 
-/*
+/**
 Editor (in signal chain) contains:
 - Input channel selector (filtered output will appear on this channel as well)
 - Rolling window duration (ms)
@@ -38,32 +38,33 @@ Editor (in signal chain) contains:
 - Gains for each frequency band
 */
 
-
 class MultiBandIntegratorEditor
 	: public GenericEditor
 	, public ComboBox::Listener
 	, public Label::Listener
 {
 public:
-	MultiBandIntegratorEditor(GenericProcessor* parentNode, bool useDefaultParameterEditors = false);
+    
+    /** Constructor */
+	MultiBandIntegratorEditor(GenericProcessor* parentNode);
+    
+    /** Destructor */
 	~MultiBandIntegratorEditor();
+    
+    /** ComboBox::Listener class */
 	void comboBoxChanged(ComboBox* comboBoxThatHasChanged) override;
+    
+    /** Label::Listener class */
 	void labelTextChanged(Label* labelThatHasChanged) override;
 
-	// overrides GenericEditor
-
+    /** Called when upstream processors update their settings*/
 	void updateSettings() override;
 
-	// disable input channel selection during acquisition so that events work correctly
-	void startAcquisition() override;
-	void stopAcquisition() override;
-
-	//Visualizer* createNewCanvas() override;
-
-	//Component* getOptionsPanel();
-
-	void saveCustomParameters(XmlElement* xml) override;
-	void loadCustomParameters(XmlElement* xml) override;
+    /** Save custom editor parameters */
+	void saveCustomParametersToXml(XmlElement* xml) override;
+    
+    /** Load custom editor parameters*/
+	void loadCustomParametersFromXml(XmlElement* xml) override;
 
 private:
 	typedef juce::Rectangle<int> Rectangle;
@@ -85,8 +86,7 @@ private:
 	ScopedPointer<Label> rollLabel2;
 	ScopedPointer<Label> rollEdit;
 	
-
-	// frequency bandds
+	// frequency bands
 	ScopedPointer<Label> freqLabel;
 	ScopedPointer<Label> freqLabelSub;
 	ScopedPointer<Label> freqLabelSub2;

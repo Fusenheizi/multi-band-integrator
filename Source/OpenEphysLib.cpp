@@ -37,8 +37,8 @@ using namespace Plugin;
 extern "C" EXPORT void getLibInfo(Plugin::LibraryInfo* info)
 {
     info->apiVersion = PLUGIN_API_VER;
-    info->name = "Multi-band Integrator";
-    info->libVersion = 1;
+    info->name = "Multi-Band Integrator";
+    info->libVersion = "0.1.0";
     info->numPlugins = NUM_PLUGINS;
 }
 
@@ -47,9 +47,9 @@ extern "C" EXPORT int getPluginInfo(int index, Plugin::PluginInfo* info)
     switch (index)
     {
     case 0:
-        info->type = Plugin::PLUGIN_TYPE_PROCESSOR;
-        info->processor.name = "Multi-band Integrator";
-        info->processor.type = Plugin::FilterProcessor;
+        info->type = Plugin::Type::PROCESSOR;
+        info->processor.name = "Multi-Band Integrator";
+        info->processor.type = Plugin::Processor::FILTER;
         info->processor.creator = &(Plugin::createProcessor<MultiBandIntegrator>);
         break;
     default:

@@ -26,6 +26,7 @@ First, simply filtering the data before thresholding
 */
 
 #include "MultiBandIntegrator.h"
+
 #include "MultiBandIntegratorEditor.h"
 
 MultiBandIntegrator::MultiBandIntegrator()
@@ -42,22 +43,20 @@ MultiBandIntegrator::MultiBandIntegrator()
 	, deltaHigh         (4.0f)
 	, deltaGain         (-1.0f)
 {
-    setProcessorType(PROCESSOR_TYPE_FILTER);
 
 }
 
-MultiBandIntegrator::~MultiBandIntegrator() {}
-
 AudioProcessorEditor* MultiBandIntegrator::createEditor()
 {
-    editor = new MultiBandIntegratorEditor(this);
-    return editor;
+    editor = std::make_unique<MultiBandIntegratorEditor> (this);
+
+    return editor.get();
 }
 
 
 void MultiBandIntegrator::updateSettings()
 {
-	if (settings.numInputs > 0)
+	/*if (settings.numInputs > 0)
 	{
 
 		const DataChannel* in = getDataChannel(inputChan);
@@ -69,30 +68,25 @@ void MultiBandIntegrator::updateSettings()
 
 		setFilterParameters();
 		setRollingWindowParameters();
-	}
-	
-
+	}*/
 }
 
 void MultiBandIntegrator::setRollingWindowParameters()
 {
 	//set rolling buffer size
-	int sampRate = dataChannelArray[inputChan]->getSampleRate();
+	/*int sampRate = dataChannelArray[inputChan]->getSampleRate();
 	int buffSize = sampRate*rollDur / 1000;
 
-	rollingAverage.setSize(buffSize);
+	rollingAverage.setSize(buffSize);*/
 
 }
 
 void MultiBandIntegrator::setFilterParameters()
 {
-	if (settings.numInputs == 0)
+	/*if (settings.numInputs == 0)
 		return;
 
-
 	//design 3 filters with similar properties
-
-
 	int sampRate = dataChannelArray[inputChan]->getSampleRate();
 
 	for (int n = 0; n < 3; n = n + 1)
@@ -135,21 +129,21 @@ void MultiBandIntegrator::setFilterParameters()
 	deltaParams[2] = (deltaHigh + deltaLow) / 2;
 	deltaParams[3] = deltaHigh - deltaLow;
 
-	filters[2]->setParams(deltaParams);
+	filters[2]->setParams(deltaParams);*/
 
 }
 
-bool MultiBandIntegrator::enable()
+bool MultiBandIntegrator::startAcquisition()
 {
 	setRollingWindowParameters();
 
 	return true;
 }
 
-void MultiBandIntegrator::process(AudioSampleBuffer& continuousBuffer)
+void MultiBandIntegrator::process(AudioBuffer<float>& continuousBuffer)
 {
 
-	int currChan = inputChan;
+	/*int currChan = inputChan;
 
     if (inputChan < 0 || inputChan >= continuousBuffer.getNumChannels()) // (shouldn't really happen)
         return;
@@ -272,7 +266,7 @@ void MultiBandIntegrator::process(AudioSampleBuffer& continuousBuffer)
 		                      scratchBuffer,
 		                      3,
 		                      0,
-		                      nSamples);
+		                      nSamples);*/
     
 }
 
@@ -335,14 +329,6 @@ void MultiBandIntegrator::setParameter(int parameterIndex, float newValue)
     }
 }
 
-bool MultiBandIntegrator::disable()
-{
-
-    return true;
-}
-
-
-
 
 RollingAverage::RollingAverage()
 {
@@ -350,11 +336,6 @@ RollingAverage::RollingAverage()
 
 	newSamples = 0;
 	sum = 0;
-}
-
-RollingAverage::~RollingAverage()
-{
-
 }
 
 void RollingAverage::setSize(int numSamples)
