@@ -74,7 +74,7 @@ void MultiBandIntegratorSettings::setRollingWindowParameters(float sampleRate, v
 
 
 MultiBandIntegrator::MultiBandIntegrator()
-    : GenericProcessor  ("Multi-band Integrator")
+    : GenericProcessor  ("Multi-Band Integrator")
 {
     
     addSelectedChannelsParameter(Parameter::STREAM_SCOPE,
