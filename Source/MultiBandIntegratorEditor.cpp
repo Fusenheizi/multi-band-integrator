@@ -23,53 +23,69 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "MultiBandIntegratorEditor.h"
 #include "MultiBandIntegrator.h"
 
-CustomLabel::CustomLabel(Parameter* param) : ParameterEditor(param)
+CustomLabel::CustomLabel(Parameter* param, Colour colour) : ParameterEditor(param)
 {
     label.addListener(this);
-    label.setBounds(0, 0, 50, 15);
+    label.setBounds(0, 0, 40, 15);
     label.setEditable(true);
+    label.setColour(Label::backgroundColourId, colour);
+    label.setColour(Label::textColourId, Colour(200,200,200));
     addAndMakeVisible(&label);
-    setBounds(0, 0, 50, 15);
+    setBounds(0, 0, 40, 15);
 }
 
-void CustomLabel::labelTextChanged(Label*)
+
+void BackgroundComponent::paint(Graphics& g)
 {
-    param->setNextValue(label.getText().getFloatValue());
+    g.setColour(Colours::lightgrey);
+    g.fillRoundedRectangle(115, 25, 130, 65, 3.0f);
+    
+    g.setColour(Colours::darkgrey);
+    g.drawText("low", 120, 12, 40, 10, Justification::centred);
+    g.drawText("high", 160, 12, 40, 10, Justification::centred);
+    g.drawText("gain", 200, 12, 40, 10, Justification::centred);
+    
+    g.drawText(CharPointer_UTF8("α"), 103, 32, 50, 10, Justification::left);
+    g.drawText(CharPointer_UTF8("β"), 103, 52, 50, 10, Justification::left);
+    g.drawText(CharPointer_UTF8("δ"), 103, 72, 50, 10, Justification::left);
+    
+    
 }
-
-void CustomLabel::updateView()
-{
-    label.setText(param->getValueAsString(), dontSendNotification);
-}
-
 
 MultiBandIntegratorEditor::MultiBandIntegratorEditor(GenericProcessor* parentNode)
     : GenericEditor(parentNode)
 {
-	desiredWidth = 250;
+	desiredWidth = 254;
+    
+    addAndMakeVisible(&backgroundComponent);
+    backgroundComponent.setBounds(0, 25, 250, 140);
 
-    addSelectedChannelsParameterEditor("Channel", 15, 38);
-    addTextBoxParameterEditor("window_ms", 15, 72);
+    addSelectedChannelsParameterEditor("Channel", 15, 43);
+    addTextBoxParameterEditor("window_ms", 15, 74);
+    
+    Colour alphaColour = Colour(30,30,30);
+    Colour betaColour = Colour(60,60,60);
+    Colour deltaColour = Colour(90,90,90);
     
     Parameter* param = getProcessor()->getParameter("alpha_low");
-    addCustomParameterEditor(new CustomLabel(param), 110, 45);
+    addCustomParameterEditor(new CustomLabel(param, alphaColour), 120, 55);
     param = getProcessor()->getParameter("alpha_high");
-    addCustomParameterEditor(new CustomLabel(param), 110, 70);
+    addCustomParameterEditor(new CustomLabel(param, alphaColour), 160, 55);
     param = getProcessor()->getParameter("alpha_gain");
-    addCustomParameterEditor(new CustomLabel(param), 110, 95);
+    addCustomParameterEditor(new CustomLabel(param, alphaColour), 200, 55);
     
     param = getProcessor()->getParameter("beta_low");
-    addCustomParameterEditor(new CustomLabel(param), 160, 45);
+    addCustomParameterEditor(new CustomLabel(param, betaColour), 120, 75);
     param = getProcessor()->getParameter("beta_high");
-    addCustomParameterEditor(new CustomLabel(param), 160, 70);
+    addCustomParameterEditor(new CustomLabel(param, betaColour), 160, 75);
     param = getProcessor()->getParameter("beta_gain");
-    addCustomParameterEditor(new CustomLabel(param), 160, 95);
+    addCustomParameterEditor(new CustomLabel(param, betaColour), 200, 75);
     
     param = getProcessor()->getParameter("delta_low");
-    addCustomParameterEditor(new CustomLabel(param), 210, 45);
+    addCustomParameterEditor(new CustomLabel(param, deltaColour), 120, 95);
     param = getProcessor()->getParameter("delta_high");
-    addCustomParameterEditor(new CustomLabel(param), 210, 70);
+    addCustomParameterEditor(new CustomLabel(param, deltaColour), 160, 95);
     param = getProcessor()->getParameter("delta_gain");
-    addCustomParameterEditor(new CustomLabel(param), 210, 95);
+    addCustomParameterEditor(new CustomLabel(param, deltaColour), 200, 95);
 
 }

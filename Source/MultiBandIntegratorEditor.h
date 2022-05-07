@@ -37,22 +37,36 @@ class CustomLabel
 {
 public:
     /** Constructor*/
-    CustomLabel(Parameter* param);
+    CustomLabel(Parameter* param, Colour colour);
 
     /** Destructor */
     ~CustomLabel() { }
 
     /** Respond to text input*/
-    void labelTextChanged(Label*);
+    void labelTextChanged(Label*)
+    {
+        param->setNextValue(label.getText().getFloatValue());
+    }
 
     /** Updates the view*/
-    void updateView();
+    void updateView()
+    {
+        label.setText(param->getValueAsString(), dontSendNotification);
+    }
     
 private:
     
     Label label;
     
 };
+
+/** Draws editor background*/
+class BackgroundComponent : public Component
+{
+public:
+    void paint(Graphics& g) override;
+};
+
 
 /**
 Editor (in signal chain) contains:
@@ -72,6 +86,10 @@ public:
     
     /** Destructor */
     ~MultiBandIntegratorEditor() { }
+    
+private:
+    
+    BackgroundComponent backgroundComponent;
 };
 
 
