@@ -40,20 +40,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <ProcessorHeaders.h>
 #include <algorithm> // max
 
-enum
-{
-	pInputChan,
-	pRollDur,
-	pAlphaLow,
-	pAlphaHigh,
-	pAlphaGain,
-	pBetaLow,
-	pBetaHigh,
-	pBetaGain,
-	pDeltaLow,
-	pDeltaHigh,
-	pDeltaGain
-};
+
 
 /**
     Computes the rolling average of a signal.
@@ -85,6 +72,37 @@ private:
 	double sum;
 	int newSamples;
 	double lastAvg;
+};
+
+
+/** Holds settings for one stream's multi-band integrator */
+class MultiBandIntegratorSettings
+{
+public:
+    /** Constructor -- sets default values*/
+    MultiBandIntegratorSettings();
+
+    /** Destructor*/
+    ~MultiBandIntegratorSettings() { }
+    
+    /** Updates filter parameters */
+    void updateFilter(int index,
+                      float sampleRate,
+                      var lowCut,
+                      var highCut);
+
+    /** Updates rolling window parameters*/
+    void setRollingWindowParameters(float sampleRate, var durationMs);
+
+    OwnedArray<Dsp::Filter> filters;
+    
+    RollingAverage rollingAverage;
+
+    int localChannelIndex;
+    
+    float alphaGain;
+    float betaGain;
+    float deltaGain;
 };
 
 /**
@@ -119,45 +137,14 @@ public:
     /** Called whenever the settings of upstream plugins change */
 	void updateSettings() override;
 
-    /** Updates filter parameters */
-	void setFilterParameters();
-
-    /** Updates rolling window parameters*/
-	void setRollingWindowParameters();
-
-    /** Called at start of acquisition*/
-	bool startAcquisition() override;
-
-    /** Updates parameter value*/
-    void setParameter(int parameterIndex, float newValue) override;
-
+    /** Called whenever a parameter's value is changed (called by GenericProcessor::setParameter())*/
+    void parameterValueChanged(Parameter* param) override;
 
 private:
-	// ----- filters---------
-	
-	OwnedArray<Dsp::Filter> filters;
-	
-	AudioBuffer<float> scratchBuffer;
+    
+    StreamSettings<MultiBandIntegratorSettings> settings;
 
-	float rollDur;
-
-	float alphaLow;
-	float alphaHigh;
-	float alphaGain;
-	
-	float betaLow;
-	float betaHigh;
-	float betaGain;
-	int betaChan;
-
-	float deltaLow;
-	float deltaHigh;
-	float deltaGain;
-	int deltaChan;
-
-    int inputChan;
-
-	RollingAverage rollingAverage;
+    AudioBuffer<float> scratchBuffer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiBandIntegrator);
 };

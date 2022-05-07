@@ -30,6 +30,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <cfloat>
 #include <algorithm>
 
+
+class CustomLabel
+    : public ParameterEditor,
+      public Label::Listener
+{
+public:
+    /** Constructor*/
+    CustomLabel(Parameter* param);
+
+    /** Destructor */
+    ~CustomLabel() { }
+
+    /** Respond to text input*/
+    void labelTextChanged(Label*);
+
+    /** Updates the view*/
+    void updateView();
+    
+private:
+    
+    Label label;
+    
+};
+
 /**
 Editor (in signal chain) contains:
 - Input channel selector (filtered output will appear on this channel as well)
@@ -40,8 +64,6 @@ Editor (in signal chain) contains:
 
 class MultiBandIntegratorEditor
 	: public GenericEditor
-	, public ComboBox::Listener
-	, public Label::Listener
 {
 public:
     
@@ -49,64 +71,7 @@ public:
 	MultiBandIntegratorEditor(GenericProcessor* parentNode);
     
     /** Destructor */
-	~MultiBandIntegratorEditor();
-    
-    /** ComboBox::Listener class */
-	void comboBoxChanged(ComboBox* comboBoxThatHasChanged) override;
-    
-    /** Label::Listener class */
-	void labelTextChanged(Label* labelThatHasChanged) override;
-
-    /** Called when upstream processors update their settings*/
-	void updateSettings() override;
-
-    /** Save custom editor parameters */
-	void saveCustomParametersToXml(XmlElement* xml) override;
-    
-    /** Load custom editor parameters*/
-	void loadCustomParametersFromXml(XmlElement* xml) override;
-
-private:
-	typedef juce::Rectangle<int> Rectangle;
-
-	// Basic UI element creation methods. Always register "this" (the editor) as the listener,
-	// but may specify a different Component in which to actually display the element.
-	Label* createEditable(const String& name, const String& initialValue,
-		const String& tooltip, Rectangle bounds);
-	Label* createLabel(const String& name, const String& text, Rectangle bounds);
-
-	// Utilities for parsing entered values
-	static bool updateIntLabel(Label* label, int min, int max, int defaultValue, int* out);
-	static bool updateFloatLabel(Label* label, float min, float max, float defaultValue, float* out);
-
-	ScopedPointer<Label> inputLabel;
-	ScopedPointer<ComboBox> inputBox;
-
-	ScopedPointer<Label> rollLabel1;
-	ScopedPointer<Label> rollLabel2;
-	ScopedPointer<Label> rollEdit;
-	
-	// frequency bands
-	ScopedPointer<Label> freqLabel;
-	ScopedPointer<Label> freqLabelSub;
-	ScopedPointer<Label> freqLabelSub2;
-	
-	ScopedPointer<Label> alphaLowEdit;
-	ScopedPointer<Label> alphaHighEdit;
-	ScopedPointer<Label> betaLowEdit;
-	ScopedPointer<Label> betaHighEdit;
-	ScopedPointer<Label> deltaLowEdit;
-	ScopedPointer<Label> deltaHighEdit;
-
-	// frequency band gains
-	ScopedPointer<Label> gainLabel;
-
-	ScopedPointer<Label> alphaLabel;
-	ScopedPointer<Label> alphaEditable;
-	ScopedPointer<Label> betaLabel;
-	ScopedPointer<Label> betaEditable;
-	ScopedPointer<Label> deltaLabel;
-	ScopedPointer<Label> deltaEditable;
+    ~MultiBandIntegratorEditor() { }
 };
 
 
