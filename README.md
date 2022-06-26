@@ -2,7 +2,7 @@
 
 ![multi-band-integrator-screenshot](Resources/multi-band-integrator.png)
 
-Mixes, weights, and apply a rolling average to three bandwidths of interest on a single channel. The Multi-Band Integrator be used to detect many types of neural activity with well-specified frequency components, such as seizures, ripples, and alpha waves. It is usually paired with the [Crossing Detector](https://github.com/open-ephys-plugins/crossing-detector) to trigger events when the power crosses a particular threshold.
+Mixes, weights, and applies a rolling average to three bandwidths of interest on each continuous input channel. The Multi-Band Integrator can be used to detect many types of neural activity with well-specified frequency components, such as seizures, ripples, and alpha waves. It is usually paired with the [Crossing Detector](https://github.com/open-ephys-plugins/crossing-detector) to trigger events when the integrated power crosses a particular threshold.
 
 
 ## Installation
