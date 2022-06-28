@@ -179,7 +179,7 @@ void MultiBandIntegrator::process(AudioBuffer<float>& continuousBuffer)
 
             int localIndex = module->localChannelIndex;
             
-            if (localIndex < 0)
+            if (localIndex < 0 || numSamplesInBlock == 0)
                 continue;
             
             int globalIndex = stream->getContinuousChannels()[localIndex]->getGlobalIndex();
