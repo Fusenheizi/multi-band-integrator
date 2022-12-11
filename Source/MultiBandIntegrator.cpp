@@ -87,33 +87,33 @@ MultiBandIntegrator::MultiBandIntegrator()
     
     addFloatParameter(Parameter::GLOBAL_SCOPE,
                     "alpha_low", "The alpha band low cut",
-                    6.0, 0.1, 100.0, false);
+                    6.0, 0.1, 300.0, false);
     addFloatParameter(Parameter::GLOBAL_SCOPE,
                     "alpha_high", "The alpha band high cut",
-                    9.0, 0.1, 100.0, false);
+                    9.0, 0.1, 300.0, false);
     addFloatParameter(Parameter::GLOBAL_SCOPE,
                     "alpha_gain", "The alpha band gain",
-                    4.0, -10.0, 10.0, false);
+                    4.0, -20.0, 20.0, false);
     
     addFloatParameter(Parameter::GLOBAL_SCOPE,
                     "beta_low", "The beta band low cut",
-                    13.0, 0.1, 100.0, false);
+                    13.0, 0.1, 300.0, false);
     addFloatParameter(Parameter::GLOBAL_SCOPE,
                     "beta_high", "The beta band high cut",
-                    18.0, 0.1, 100.0, false);
+                    18.0, 0.1, 300.0, false);
     addFloatParameter(Parameter::GLOBAL_SCOPE,
                     "beta_gain", "The beta band gain",
-                    7.0, -10.0, 10.0, false);
+                    7.0, -20.0, 20.0, false);
     
     addFloatParameter(Parameter::GLOBAL_SCOPE,
                     "delta_low", "The delta band low cut",
-                    1.0, 0.1, 100.0, false);
+                    1.0, 0.1, 300.0, false);
     addFloatParameter(Parameter::GLOBAL_SCOPE,
                     "delta_high", "The delta band high cut",
-                    4.0, 0.1, 100.0, false);
+                    4.0, 0.1, 300.0, false);
     addFloatParameter(Parameter::GLOBAL_SCOPE,
                     "delta_gain", "The delta band gain",
-                    -1.0, -10.0, 10.0, false);
+                    -1.0, -20.0, 20.0, false);
     
     scratchBuffer.setSize(3, 10000);
 }
