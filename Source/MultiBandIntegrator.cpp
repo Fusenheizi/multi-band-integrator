@@ -398,8 +398,8 @@ RollingAverage::RollingAverage()
 {
 	setSize(1);
 
-	newSamples = 0;
-	sum = 0;
+	// newSamples = 0;
+	// sum = 0;
 }
 
 void RollingAverage::setSize(int numSamples)
@@ -408,13 +408,13 @@ void RollingAverage::setSize(int numSamples)
 	buffer.insertMultiple(0, 0, numSamples);
 	index = 0;
 
-	sum = 0;
+	// sum = 0;
 }
 
 void RollingAverage::addSample(double sample)
 {
-	sum -= buffer[index];
-	sum += sample;
+	// sum -= buffer[index];
+	// sum += sample;
 
 	buffer.set(index, sample);
 
@@ -425,5 +425,22 @@ void RollingAverage::addSample(double sample)
 
 double RollingAverage::calculate() {
 
-	return sum / buffer.size();
+	// return sum / buffer.size();
+
+    int window_size = buffer.size();
+    
+    double result = 0;
+    double norm = 0;
+    
+    for (int i = 0; i < window_size; i++) {
+        double x = i; // x 现在只从 0 到窗口大小 - 1 遍历，不再有负数
+        double weight = 1.0 + (1.0 + x * x);  // 直接使用二次多项式权重，更接近当前点的历史数据得到更大的权重
+        
+        // 取过去的历史数据，计算相应的加权值
+        int buf_index = (index + i + window_size) % window_size;
+        result += weight * buffer[buf_index];
+        norm += weight;
+    }
+
+    return result / norm; // 返回加权平均值
 }
