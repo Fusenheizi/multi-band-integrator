@@ -29,6 +29,7 @@ First, simply filtering the data before thresholding
 
 #include "MultiBandIntegratorEditor.h"
 
+#include <vector>
 
 MultiBandIntegratorSettings::MultiBandIntegratorSettings() :
     localChannelIndex(0),
@@ -427,20 +428,44 @@ double RollingAverage::calculate() {
 
 	// return sum / buffer.size();
 
-    int window_size = buffer.size();
+    // v0.1_fixed
+    // int window_size = buffer.size();
     
-    double result = 0;
-    double norm = 0;
+    // double result = 0;
+    // double norm = 0;
     
-    for (int i = 0; i < window_size; i++) {
-        double x = i; // x 现在只从 0 到窗口大小 - 1 遍历，不再有负数
-        double weight = 1.0 + (1.0 + x * x);  // 直接使用二次多项式权重，更接近当前点的历史数据得到更大的权重
+    // for (int i = 0; i < window_size; i++) {
+    //     double x = i; // x 现在只从 0 到窗口大小 - 1 遍历，不再有负数
+    //     double weight = 1.0 + (1.0 + x * x);  // 直接使用二次多项式权重，更接近当前点的历史数据得到更大的权重
         
-        // 取过去的历史数据，计算相应的加权值
-        int buf_index = (index + i + window_size) % window_size;
-        result += weight * buffer[buf_index];
-        norm += weight;
+    //     // 取过去的历史数据，计算相应的加权值
+    //     int buf_index = (index + i) % window_size;
+    //     result += weight * buffer[buf_index];
+    //     norm += weight;
+    // }
+
+    // return result / norm; // 返回加权平均值
+    
+
+    // v0.2
+    static std::vector<double> weights;  // 静态权重数组，只计算一次
+    static double weight_sum = 0;
+
+    // 只在第一次调用或buffer大小改变时初始化权重
+    if (weights.size() != buffer.size()) {
+        weights.resize(buffer.size());
+        weight_sum = 0;
+        for (int i = 0; i < buffer.size(); i++) {
+            weights[i] = 1.0 + (1.0 + i * i); // 直接使用二次多项式权重，更接近当前点的历史数据得到更大的权重
+            weight_sum += weights[i];
+        }
     }
 
-    return result / norm; // 返回加权平均值
+    // 点乘计算
+    double result = 0;
+    for (int i = 0; i < buffer.size(); i++) {
+        result += buffer[(index + i) % buffer.size()] * weights[i];
+    }
+
+    return result / weight_sum; // 返回加权平均值
 }
