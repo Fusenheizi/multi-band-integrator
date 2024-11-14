@@ -1,5 +1,13 @@
 # Multi-Band Integrator
 
+## Change for Multi-Band Integrator
+
+This project modifies the moving average in the original plugin functionality to a Savitzky-Golay filter.
+
+![multi-band-integrator_SG-screenshot](Resources/multi-band-integrator_SG.png)
+
+---
+
 ![multi-band-integrator-screenshot](Resources/multi-band-integrator.png)
 
 Mixes, weights, and applies a rolling average to three bandwidths of interest on each continuous input channel. The Multi-Band Integrator can be used to detect many types of neural activity with well-specified frequency components, such as seizures, ripples, and alpha waves. It is usually paired with the [Crossing Detector](https://github.com/open-ephys-plugins/crossing-detector) to trigger events when the integrated power crosses a particular threshold.
@@ -22,7 +30,7 @@ First, follow the instructions on [this page](https://open-ephys.github.io/gui-d
 **Important:** This plugin is intended for use with the latest version of the GUI (0.6.0 and higher). The GUI should be compiled from the [`main`](https://github.com/open-ephys/plugin-gui/tree/main) branch, rather than the former `master` branch.
 
 Then, clone this repository into a directory at the same level as the `plugin-GUI`, e.g.:
- 
+
 ```
 Code
 ├── plugin-GUI
